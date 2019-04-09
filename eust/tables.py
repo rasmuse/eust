@@ -3,7 +3,6 @@
 import eust
 import pandas as pd
 import re
-import pandasdmx
 
 def read_labels(structure_path):
     req = pandasdmx.Request()

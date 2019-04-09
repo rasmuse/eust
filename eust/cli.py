@@ -30,12 +30,9 @@ def table():
 @click.argument('table_name', type=str)
 @click.argument('outfile', type=click.Path(exists=False))
 def download_datastructure(table_name, outfile):
-    import pandasdmx
+    import eust.metadata
+    eust.metadata.download_datastructure(table_name, outfile)
 
-    service = 'ESTAT'
-    name = f'DSD_{table_name}'
-    r = pandasdmx.Request(service)
-    r.datastructure(name).write_source(outfile)
 
 @table.command()
 @click.argument('structure_file', type=click.Path(exists=True))
@@ -44,10 +41,11 @@ def download_datastructure(table_name, outfile):
 def create(structure_file, tsv_file, hdf_file):
     import pandas as pd
     import eust.tables
+    import eust.metadata
 
     with pd.HDFStore(hdf_file) as store:
         store['data'] = eust.tables.raw_to_dataframe(tsv_file)
-        for key, labels in eust.tables.read_labels(structure_file).items():
+        for key, labels in eust.metadata.read_labels(structure_file).items():
             store[f'labels/{key}'] = labels
 
 

@@ -15,8 +15,13 @@ requirements = [
     'Click>=7.0',
     'pandas>=0.24',
     'tables>=3.2',
-    'pandasdmx>=0.9',
     ]
+
+optional_requirements = {
+    'metadata': [
+        'pandasdmx>=0.9',
+    ]
+}
 
 setup_requirements = ['pytest-runner', ]
 
@@ -43,6 +48,7 @@ setup(
         ],
     },
     install_requires=requirements,
+    extras_require=optional_requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,

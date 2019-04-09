@@ -3,7 +3,6 @@
 import eust
 import pandas as pd
 import re
-import pandasdmx
 
 import eust
 import pandas as pd
