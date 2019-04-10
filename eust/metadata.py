@@ -1,40 +1,67 @@
-try:
-    import pandasdmx
-except ImportError as e:
-    message = (
-        'The package pandasdmx is needed for this operation. '
-        'pip install eust[metadata] or pip install pandasdmx.'
+# -*- coding: utf-8 -*-
+
+from typing import (
+    Mapping,
+    )
+
+import pandas as pd
+import pandasdmx
+
+from eust.core import (
+    PathLike
+    )
+
+def _is_header_row(d):
+    return (d['dimension'] == d['code']) & (d['dimension'] == d['label'])
+
+def _get_dimensions(codelist):
+    dimensions = (
+        codelist
+        [codelist['dim_or_attr'] == 'D']
+        .drop(columns='dim_or_attr')
+        .reset_index()
+        .rename(columns={
+            'level_0': 'dimension',
+            'level_1': 'code',
+            'name': 'label',
+            })
+        .pipe(lambda d: d[~_is_header_row(d)])
+        .pipe(lambda d: d.assign(dimension=d.dimension.str.lower()))
+        .set_index(['dimension', 'code'])
         )
-    raise ImportError(message) from e
 
-def download_datastructure(table_name, outfile):
-    service = 'ESTAT'
-    name = f'DSD_{table_name}'
-    r = pandasdmx.Request(service)
-    r.datastructure(name).write_source(outfile)
+    return dimensions
 
-def read_labels(structure_path):
+
+def _get_attributes(codelist):
+    attributes = (
+        codelist
+        [codelist['dim_or_attr'] == 'A']
+        .drop(columns='dim_or_attr')
+        .reset_index()
+        .rename(columns={
+            'level_0': 'attribute',
+            'level_1': 'code',
+            'name': 'label',
+            })
+        .set_index(['attribute', 'code'])
+        )
+
+    return attributes
+
+
+def read_sdmx(sdmx_path: PathLike) -> Mapping[str, pd.DataFrame]:
     req = pandasdmx.Request()
     structure = req.get(
-        fromfile=structure_path,
+        fromfile=sdmx_path,
         writer='pandasdmx.writer.structure2pd'
         )
+
     codelist = structure.write()['codelist']
 
-    result = {}
-
-    dims = codelist[codelist['dim_or_attr']=='D'].groupby(level=0)
-    for dim, dim_metadata in dims:
-        key = f'dimension/{dim}'
-        labels = dim_metadata.loc[dim]['name']
-        labels.index.name = 'code'
-        result[key] = labels
-
-    attrs = codelist[codelist['dim_or_attr']=='A'].groupby(level=0)
-    for attr, attr_metadata in attrs:
-        key = f'attr/{attr}'
-        labels = attr_metadata.loc[attr]['name']
-        labels.index.name = 'code'
-        result[key] = labels
+    result = {
+        'dimensions': _get_dimensions(codelist),
+        'attributes': _get_attributes(codelist),
+    }
 
     return result
