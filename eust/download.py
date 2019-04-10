@@ -39,7 +39,7 @@ def _write_via_tempdir(
         shutil.move(temp_path, dst_path)
 
 
-def download_metadata(table: str, path: PathLike) -> None:
+def download_metadata_sdmx(table: str, path: PathLike) -> None:
     service = conf['download.sdmx_service_name']
     name = conf['download.sdmx_datastructure_template'].format(table=table)
 
@@ -61,23 +61,34 @@ def _download_file(url, path):
 
     _write_via_tempdir(download_to_path, path)
 
-def download_data(table: str, path: PathLike) -> None:
+def download_data_tsv_gz(table: str, path: PathLike) -> None:
     url = conf['download.bulk_tsv_gz_url_template'].format(table=table)
     _download_file(url, path)
 
 
+_DOWNLOAD_FORMATS = {
+    'metadata': 'sdmx',
+    'data': 'tsv_gz',
+}
+
 def download_table(table: str, dst_dir: Optional[PathLike] = None) -> None:
     if dst_dir is None:
         date_string = datetime.datetime.utcnow().isoformat()
-        dst_dir = conf['data_dir'] / f'tables/{table}/{date_string}/download'
+        dst_dir = conf['data_dir'] / f'tables/{table}/{date_string}'
 
     dst_dir = Path(dst_dir)
 
-    def download_both(temp_dir):
-        metadata_path = temp_dir / f'sdmx-structure.xml'
-        data_path = temp_dir / f'data.tsv.gz'
+    def download_table(temp_dir):
+        for item in ('metadata', 'data'):
+            format_name = _DOWNLOAD_FORMATS[item]
 
-        download_metadata(table, metadata_path)
-        download_data(table, data_path)
+            relpath_template = conf[f'{item}_path_templates'][format_name]
+            relpath = relpath_template.format(table=table)
+            download_path = temp_dir / relpath
 
-    _write_via_tempdir(download_both, dst_dir)
+            download_func_name = f'download_{item}_{format_name}'
+            download_func = globals()[download_func_name]
+
+            download_func(table, download_path)
+
+    _write_via_tempdir(download_table, dst_dir)

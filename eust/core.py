@@ -20,6 +20,12 @@ def get_default_config():
             'BulkDownloadListing?sort=1&downfile=data%2F{table}.tsv.gz'
             ),
         'data_dir': '~/eurostat-data',
+        'metadata_path_templates': {
+            'sdmx': 'meta/{table}.sdmx.xml',
+        },
+        'data_path_templates': {
+            'tsv_gz': 'data/{table}.tsv.gz',
+        },
     }
 
 def modify_config(d):
