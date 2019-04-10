@@ -17,6 +17,7 @@ requirements = [
     'tables>=3.2',
     'pandasdmx>=0.9',
     'requests>=2.5.1',
+    'yaconf==0.2',
     ]
 
 setup_requirements = ['pytest-runner', ]

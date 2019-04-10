@@ -6,8 +6,9 @@ __author__ = """Rasmus Einarsson"""
 __email__ = 'mr@rasmuseinarsson.se'
 __version__ = '0.1.0'
 
-import pathlib
-DATA_DIR = pathlib.Path('~/eurostat/data/data').expanduser()
+from eust.core import (
+    conf,
+    )
 
 import eust.tables
 import eust.nuts
