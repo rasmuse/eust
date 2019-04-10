@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import re
+import gzip
+
 import pandas as pd
 
 
@@ -60,3 +62,8 @@ def read_tsv(path_or_buffer) -> pd.DataFrame:
     d['value'] = d['value'].astype(float)
 
     return d
+
+
+def read_tsv_gz(path_or_buffer) -> pd.DataFrame:
+    with gzip.open(path_or_buffer, 'rb') as f:
+        return read_tsv(f)
