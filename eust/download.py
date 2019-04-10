@@ -19,6 +19,8 @@ import functools
 from eust.core import (
     PathLike,
     conf,
+    get_rel_table_version_dir,
+    get_rel_item_path,
     )
 
 
@@ -71,19 +73,24 @@ _DOWNLOAD_FORMATS = {
     'data': 'tsv_gz',
 }
 
-def download_table(table: str, dst_dir: Optional[PathLike] = None) -> None:
-    if dst_dir is None:
-        date_string = datetime.datetime.utcnow().isoformat()
-        dst_dir = conf['data_dir'] / f'tables/{table}/{date_string}'
+def download_table(table: str, data_dir: Optional[PathLike] = None) -> None:
+    if data_dir is None:
+        data_dir = conf['data_dir']
 
-    dst_dir = Path(dst_dir)
+    version = datetime.datetime.utcnow().isoformat()
+
+    table_version_rel_dir = get_rel_table_version_dir(table, version)
+
+    dst_dir = data_dir / table_version_rel_dir
 
     def download_table(temp_dir):
         for item in ('metadata', 'data'):
             format_name = _DOWNLOAD_FORMATS[item]
 
-            relpath_template = conf[f'{item}_path_templates'][format_name]
-            relpath = relpath_template.format(table=table)
+            relpath = (
+                get_rel_item_path(table, version, item, format_name)
+                .relative_to(table_version_rel_dir)
+                )
             download_path = temp_dir / relpath
 
             download_func_name = f'download_{item}_{format_name}'

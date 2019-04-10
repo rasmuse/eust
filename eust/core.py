@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import importlib
 from typing import (
     Union,
     )
@@ -20,18 +21,82 @@ def get_default_config():
             'BulkDownloadListing?sort=1&downfile=data%2F{table}.tsv.gz'
             ),
         'data_dir': '~/eurostat-data',
-        'metadata_path_templates': {
-            'sdmx': 'meta/{table}.sdmx.xml',
-        },
-        'data_path_templates': {
-            'tsv_gz': 'data/{table}.tsv.gz',
-        },
+        'metadata_formats': [
+            'sdmx',
+        ],
+        'data_formats': [
+            'hdf5',
+            'tsv_gz',
+        ]
     }
 
 def modify_config(d):
     d['data_dir'] = Path(d['data_dir']).expanduser()
 
+
 conf = yaconf.get_file_reader(APP_NAME)
 conf.loaders.append(get_default_config)
 conf.modify = modify_config
 conf.load()
+
+def get_rel_table_dir(table):
+    return Path('tables') / table
+
+def get_rel_table_version_dir(table, version):
+    return get_rel_table_dir(table) / version
+
+
+_PATH_SUFFIXES = {
+    'metadata': {
+        'sdmx': '.sdmx.xml',
+    },
+    'data': {
+        'tsv_gz': '.tsv.gz',
+        'hdf5': '.h5',
+    }
+}
+
+def list_versions(table):
+    table_dir = conf['data_dir'] / get_rel_table_dir(table)
+    return sorted(list(table_dir.iterdir()))
+
+def _get_best_format(table, version, item):
+    preference_order = conf[f'{item}_formats']
+
+    for fmt in preference_order:
+        path = conf['data_dir'] / get_rel_item_path(table, version, item, fmt)
+        if path.exists():
+            return fmt
+
+def get_rel_item_path(table, version, item, fmt):
+    suffix = _PATH_SUFFIXES[item][fmt]
+    filename = f'{table}{suffix}'
+    return get_rel_table_version_dir(table, version) / item / filename
+
+# def get_data_path(table, version='latest', fmt=None):
+#     return get_item_path(table, version, 'data', fmt)
+
+# def get_metadata_path(table, version='latest', fmt=None):
+#     return get_item_path(table, version, 'metadata', fmt)
+
+def _read(table, version, item, fmt):
+    if version == 'latest':
+        version = list_versions(table)[-1]
+
+    if fmt is None:
+        fmt = _get_best_format(table, version, item)
+
+    read_module = importlib.import_module(f'eust.{item}')
+    read_func = getattr(read_module, f'read_{fmt}')
+    item_path = conf['data_dir'] / get_rel_item_path(table, version, item, fmt)
+    return read_func(item_path)
+
+def read_metadata(table, version='latest', fmt=None):
+    return _read(table, version, 'metadata', fmt)
+
+def read_data(table, version='latest', fmt=None):
+    return _read(table, version, 'data', fmt)
+
+
+# for k, v in dict(globals()).items():
+#     print(k)
