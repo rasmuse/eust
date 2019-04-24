@@ -3,6 +3,8 @@
 import importlib
 from typing import (
     Union,
+    Optional,
+    Sequence,
     )
 from pathlib import Path
 
@@ -54,11 +56,13 @@ def get_rel_table_dir(table):
 def get_rel_table_version_dir(table, version):
     return get_rel_table_dir(table) / version
 
-def list_versions(table):
+def list_versions(table) -> Sequence[str]:
     table_dir = conf['data_dir'] / get_rel_table_dir(table)
-    return sorted(list(table_dir.iterdir()))
+    if not table_dir.exists():
+        return []
+    return sorted([path.name for path in table_dir.iterdir()])
 
-def _get_latest_version(table):
+def _get_latest_version(table) -> str:
     return list_versions(table)[-1]
 
 def _get_best_format(table, version, item):
