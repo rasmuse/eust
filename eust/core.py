@@ -33,18 +33,10 @@ def get_default_config():
 def modify_config(d):
     d['data_dir'] = Path(d['data_dir']).expanduser()
 
-
 conf = yaconf.get_file_reader(APP_NAME)
 conf.loaders.append(get_default_config)
 conf.modify = modify_config
 conf.load()
-
-def get_rel_table_dir(table):
-    return Path('tables') / table
-
-def get_rel_table_version_dir(table, version):
-    return get_rel_table_dir(table) / version
-
 
 _PATH_SUFFIXES = {
     'metadata': {
@@ -56,9 +48,18 @@ _PATH_SUFFIXES = {
     }
 }
 
+def get_rel_table_dir(table):
+    return Path('tables') / table
+
+def get_rel_table_version_dir(table, version):
+    return get_rel_table_dir(table) / version
+
 def list_versions(table):
     table_dir = conf['data_dir'] / get_rel_table_dir(table)
     return sorted(list(table_dir.iterdir()))
+
+def _get_latest_version(table):
+    return list_versions(table)[-1]
 
 def _get_best_format(table, version, item):
     preference_order = conf[f'{item}_formats']
@@ -73,15 +74,9 @@ def get_rel_item_path(table, version, item, fmt):
     filename = f'{table}{suffix}'
     return get_rel_table_version_dir(table, version) / item / filename
 
-# def get_data_path(table, version='latest', fmt=None):
-#     return get_item_path(table, version, 'data', fmt)
-
-# def get_metadata_path(table, version='latest', fmt=None):
-#     return get_item_path(table, version, 'metadata', fmt)
-
 def _read(table, version, item, fmt):
-    if version == 'latest':
-        version = list_versions(table)[-1]
+    if version is None:
+        version = _get_latest_version(table)
 
     if fmt is None:
         fmt = _get_best_format(table, version, item)
@@ -91,12 +86,8 @@ def _read(table, version, item, fmt):
     item_path = conf['data_dir'] / get_rel_item_path(table, version, item, fmt)
     return read_func(item_path)
 
-def read_metadata(table, version='latest', fmt=None):
+def read_metadata(table, version=None, fmt=None):
     return _read(table, version, 'metadata', fmt)
 
-def read_data(table, version='latest', fmt=None):
+def read_data(table, version=None, fmt=None):
     return _read(table, version, 'data', fmt)
-
-
-# for k, v in dict(globals()).items():
-#     print(k)
