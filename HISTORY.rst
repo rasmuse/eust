@@ -5,7 +5,7 @@ History
 0.2.0 (2019-04-26)
 ------------------
 
-* Create download utilities.
+* Create download for Eurostat tables and NUTS tables.
 * Support only Python 3.6 and 3.7 for now.
 * Restructure metadata reader output.
 * Create list_tables and list_table_versions functions.

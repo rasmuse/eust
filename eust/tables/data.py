@@ -3,8 +3,9 @@
 import re
 import gzip
 
-import requests
 import pandas as pd
+
+from eust.core import _download_file
 
 
 _DIMENSION_NAME_RE = re.compile(r'^[a-z_]+$')
@@ -88,14 +89,6 @@ _HDF_TABLE_PATH = 'eurostat_table'
 def _read_tsv_gz(path_or_buffer) -> pd.DataFrame:
     with gzip.open(path_or_buffer, 'rb') as f:
         return _read_tsv(f)
-
-
-def _download_file(url, path):
-    r = requests.get(url, stream=True)
-    r.raise_for_status()
-    with open(path, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=8192):
-            f.write(chunk)
 
 
 def _download_tsv_gz(url, dst_dir):

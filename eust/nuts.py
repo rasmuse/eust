@@ -3,10 +3,15 @@
 from typing import (
     Union,
     )
+from pathlib import Path
+from tempfile import TemporaryDirectory
+import zipfile
+import os
+import shutil
 
 import pandas as pd
 
-from eust.core import conf, _get_abs_path, _NUTS_DIR
+from eust.core import conf, _get_abs_path, _NUTS_DIR, _download_file
 
 
 _EXCEL_COLS = {
@@ -116,3 +121,32 @@ def read_nuts_codes(
         d = d[~is_extra_regio]
 
     return d
+
+
+def download_nuts_codes():
+    rel_subdir = conf['nuts_zip_subdir']
+    if not rel_subdir.endswith('/'):
+        rel_subdir += '/'
+
+    target_dir = _get_nuts_dir()
+    os.makedirs(target_dir, exist_ok=True)
+    with TemporaryDirectory() as tempdir:
+        tempdir = Path(tempdir)
+        zip_path = tempdir / 'archive.zip'
+        _download_file(conf['nuts_zip_url'], zip_path)
+
+        archive = zipfile.ZipFile(zip_path)
+        if rel_subdir not in archive.namelist():
+            raise ValueError(
+                f'zip archive does not contain expected subdir {rel_subdir}')
+
+        archive.extractall(path=tempdir)
+        temp_subdir = tempdir / rel_subdir
+        assert temp_subdir.exists(), list(tempdir.iterdir())
+
+        for src_path in temp_subdir.iterdir():
+            relpath = src_path.relative_to(temp_subdir)
+            dst_path = target_dir / relpath
+
+            if not dst_path.exists():
+                shutil.move(src_path, dst_path)

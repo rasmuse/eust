@@ -7,6 +7,7 @@ from typing import (
     Sequence,
     )
 from pathlib import Path
+import requests
 
 import yaconf
 
@@ -20,6 +21,10 @@ def get_default_config():
             'https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/'
             'BulkDownloadListing?dir=data&start={letter}'
             ),
+        'nuts_zip_url': (
+            'https://github.com/rasmuse/eurostat-nuts-data/archive/master.zip'
+            ),
+        'nuts_zip_subdir': 'eurostat-nuts-data-master',
         'sdmx_service_name': 'ESTAT',
         'sdmx_datastructure_template': 'DSD_{table}',
         'data_dir': '~/eurostat-data',
@@ -61,3 +66,11 @@ def _list_children(*args) -> Sequence[str]:
     if not the_parent.exists():
         return []
     return sorted([c.name for c in the_parent.iterdir()])
+
+
+def _download_file(url, path):
+    r = requests.get(url, stream=True)
+    r.raise_for_status()
+    with open(path, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            f.write(chunk)
