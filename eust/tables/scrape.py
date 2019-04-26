@@ -41,6 +41,8 @@ def _scrape_bulk_infos(initial_letter):
     page = requests.get(url)
     tree = lxml.html.fromstring(page.content)
     rows = tree.xpath('/html/body/div/form/table/tr')
+    if not rows:
+        raise ValueError('found no rows when scraping bulk download page')
     h0 = rows[0]
     assert h0.xpath('th')[0].xpath('a')[0].text == 'Name', h0
     h1 = rows[1]
