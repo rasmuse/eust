@@ -6,6 +6,8 @@ __author__ = """Rasmus Einarsson"""
 __email__ = 'mr@rasmuseinarsson.se'
 __version__ = '0.2.0'
 
+from eust.core import conf
+
 from eust.tables import (
     download_table,
     read_table_data,
