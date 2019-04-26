@@ -81,16 +81,12 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
 
 
 _TSV_GZ_FILENAME = 'data.tsv.gz'
+_HDF_FILENAME = 'data.h5'
+_HDF_TABLE_PATH = 'eurostat_table'
 
 
-def _get_tsv_gz_path(the_dir):
-    return the_dir / _TSV_GZ_FILENAME
-
-
-def read_tsv_gz(the_dir) -> pd.DataFrame:
-    path = _get_tsv_gz_path(the_dir)
-
-    with gzip.open(path, 'rb') as f:
+def _read_tsv_gz(path_or_buffer) -> pd.DataFrame:
+    with gzip.open(path_or_buffer, 'rb') as f:
         return _read_tsv(f)
 
 
@@ -102,6 +98,16 @@ def _download_file(url, path):
             f.write(chunk)
 
 
-def download_tsv_gz(table, dst_dir, url):
-    path = _get_tsv_gz_path(dst_dir)
+def _download_tsv_gz(url, dst_dir):
+    path = dst_dir / _TSV_GZ_FILENAME
     _download_file(url, path)
+
+
+def _read(the_dir):
+    hdf_path = the_dir / _HDF_FILENAME
+    tsv_gz_path = the_dir / _TSV_GZ_FILENAME
+    try:
+        return pd.read_hdf(hdf_path, _HDF_TABLE_PATH)
+    except FileNotFoundError:
+        data = _read_tsv_gz(tsv_gz_path)
+        data.to_hdf(hdf_path, _HDF_TABLE_PATH)

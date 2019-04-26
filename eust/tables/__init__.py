@@ -45,44 +45,21 @@ def _get_latest_version(table) -> str:
     return versions[-1]
 
 
-def _list_formats(table, version, item):
-    return _list_children(_TABLES_DIR, table, version, item)
-
-
-def _get_best_format(table, version, item) -> str:
-    formats = _list_formats(table, version, item)
-    if not formats:
-        raise ValueError(f'no formats available of table {table} {item}')
-
-    priority_list = conf[f'table_{item}_formats']
-
-    for format_ in priority_list:
-        if format_ in formats:
-            return format_
-
-    raise ValueError(f'none of the formats {formats} in {priority_list}')
-
-
-def _read_table_item(table, version, item, fmt):
+def _read(module, table, version):
     if version is None:
         version = _get_latest_version(table)
 
-    if fmt is None:
-        fmt = _get_best_format(table, version, item)
+    version_dir = _get_table_abs_path(table, version)
 
-    item_path = _get_table_abs_path(table, version, item, fmt)
-
-    read_module = importlib.import_module(f'eust.tables.{item}')
-    read_func = getattr(read_module, f'read_{fmt}')
-    return read_func(item_path)
+    return module._read(version_dir)
 
 
-def read_table_metadata(table, version=None, fmt=None):
-    return _read_table_item(table, version, 'metadata', fmt)
+def read_table_metadata(table, version=None):
+    return _read(eust.tables.metadata, table, version)
 
 
-def read_table_data(table, version=None, fmt=None):
-    return _read_table_item(table, version, 'data', fmt)
+def read_table_data(table, version=None):
+    return _read(eust.tables.data, table, version)
 
 
 def download_table(table: str) -> None:
@@ -95,21 +72,11 @@ def download_table(table: str) -> None:
         return
 
     with TemporaryDirectory() as td:
-        sdmx_relpath = _get_table_rel_path(table, version, 'metadata', 'sdmx')
-        tsv_gz_relpath = _get_table_rel_path(table, version, 'data', 'tsv_gz')
+        version_tempdir = Path(td) / version
+        os.makedirs(version_tempdir)
 
-        sdmx_tempdir = Path(td) / sdmx_relpath
-        tsv_gz_tempdir = Path(td) / tsv_gz_relpath
+        eust.tables.metadata._download_sdmx(table, version_tempdir)
+        eust.tables.data._download_tsv_gz(table_info['url'], version_tempdir)
 
-        os.makedirs(sdmx_tempdir)
-        os.makedirs(tsv_gz_tempdir)
-
-        eust.tables.metadata.download_sdmx(table, sdmx_tempdir)
-        eust.tables.data.download_tsv_gz(
-            table,
-            tsv_gz_tempdir,
-            url=table_info['url']
-            )
-
-        version_tempdir = Path(td) / _get_table_rel_path(table, version)
+        os.makedirs(version_dir.parent, exist_ok=True)
         shutil.move(version_tempdir, version_dir)

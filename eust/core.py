@@ -23,13 +23,6 @@ def get_default_config():
         'sdmx_service_name': 'ESTAT',
         'sdmx_datastructure_template': 'DSD_{table}',
         'data_dir': '~/eurostat-data',
-        'table_metadata_formats': [
-            'sdmx',
-        ],
-        'table_data_formats': [
-            'hdf5',
-            'tsv_gz',
-        ],
     }
 
 
@@ -59,14 +52,6 @@ def _get_rel_path(*args) -> Path:
 
 def _get_abs_path(*args) -> Path:
     return conf['data_dir'] / _get_rel_path(*args)
-
-
-def _check_exists(*args):
-    partial_args = (args[:i] for i in range(len(args) + 1))
-    for a in partial_args:
-        path = _get_abs_path(*a)
-        if not path.exists():
-            raise ValueError(f'{path} does not exist')
 
 
 def _list_children(*args) -> Sequence[str]:

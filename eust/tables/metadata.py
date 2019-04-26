@@ -54,20 +54,19 @@ def _get_attributes(codelist):
     return attributes
 
 
-def _get_sdmx_path(the_dir):
-    return the_dir / 'metadata.sdmx.xml'
+_SDMX_FILENAME = 'metadata.sdmx.xml'
 
 
-def download_sdmx(table: str, dst_dir: PathLike) -> None:
-    path = _get_sdmx_path(dst_dir)
+def _download_sdmx(table: str, dst_dir: PathLike) -> None:
+    path = dst_dir / _SDMX_FILENAME
     service = conf['sdmx_service_name']
     name = conf['sdmx_datastructure_template'].format(table=table)
     r = pandasdmx.Request(service)
     r.datastructure(name).write_source(str(path))
 
 
-def read_sdmx(the_dir: PathLike) -> Mapping[str, pd.DataFrame]:
-    path = _get_sdmx_path(the_dir)
+def _read(the_dir: PathLike) -> Mapping[str, pd.DataFrame]:
+    path = the_dir / _SDMX_FILENAME
     req = pandasdmx.Request()
     structure = req.get(
         fromfile=str(path),
