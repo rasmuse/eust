@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from typing import (
     Mapping,
     )
@@ -8,11 +9,14 @@ import pandas as pd
 import pandasdmx
 
 from eust.core import (
-    PathLike
+    conf,
+    PathLike,
     )
+
 
 def _is_header_row(d):
     return (d['dimension'] == d['code']) & (d['dimension'] == d['label'])
+
 
 def _get_dimensions(codelist):
     dimensions = (
@@ -50,10 +54,23 @@ def _get_attributes(codelist):
     return attributes
 
 
-def read_sdmx(sdmx_path: PathLike) -> Mapping[str, pd.DataFrame]:
+def _get_sdmx_path(the_dir):
+    return the_dir / 'metadata.sdmx.xml'
+
+
+def download_sdmx(table: str, dst_dir: PathLike) -> None:
+    path = _get_sdmx_path(dst_dir)
+    service = conf['sdmx_service_name']
+    name = conf['sdmx_datastructure_template'].format(table=table)
+    r = pandasdmx.Request(service)
+    r.datastructure(name).write_source(str(path))
+
+
+def read_sdmx(the_dir: PathLike) -> Mapping[str, pd.DataFrame]:
+    path = _get_sdmx_path(the_dir)
     req = pandasdmx.Request()
     structure = req.get(
-        fromfile=sdmx_path,
+        fromfile=str(path),
         writer='pandasdmx.writer.structure2pd'
         )
 

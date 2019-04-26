@@ -16,82 +16,61 @@ APP_NAME = 'eust'
 
 def get_default_config():
     return {
-        'download.sdmx_service_name': 'ESTAT',
-        'download.sdmx_datastructure_template': 'DSD_{table}',
-        'download.bulk_tsv_gz_url_template': (
+        'bulk_tsv_page_url_template': (
             'https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/'
-            'BulkDownloadListing?sort=1&downfile=data%2F{table}.tsv.gz'
+            'BulkDownloadListing?dir=data&start={letter}'
             ),
+        'sdmx_service_name': 'ESTAT',
+        'sdmx_datastructure_template': 'DSD_{table}',
         'data_dir': '~/eurostat-data',
-        'metadata_formats': [
+        'table_metadata_formats': [
             'sdmx',
         ],
-        'data_formats': [
+        'table_data_formats': [
             'hdf5',
             'tsv_gz',
-        ]
+        ],
     }
+
 
 def modify_config(d):
     d['data_dir'] = Path(d['data_dir']).expanduser()
+
 
 conf = yaconf.get_file_reader(APP_NAME)
 conf.loaders.append(get_default_config)
 conf.modify = modify_config
 conf.load()
 
-_PATH_SUFFIXES = {
-    'metadata': {
-        'sdmx': '.sdmx.xml',
-    },
-    'data': {
-        'tsv_gz': '.tsv.gz',
-        'hdf5': '.h5',
-    }
-}
 
-def get_rel_table_dir(table):
-    return Path('tables') / table
+_TABLES_DIR = 'tables'
+_BASE_DIRS = (
+    _TABLES_DIR,
+    )
 
-def get_rel_table_version_dir(table, version):
-    return get_rel_table_dir(table) / version
 
-def list_versions(table) -> Sequence[str]:
-    table_dir = conf['data_dir'] / get_rel_table_dir(table)
-    if not table_dir.exists():
+def _get_rel_path(*args) -> Path:
+    if args:
+        base_dir = args[0]
+        assert base_dir in _BASE_DIRS, base_dir
+
+    return Path('.').joinpath(*args)
+
+
+def _get_abs_path(*args) -> Path:
+    return conf['data_dir'] / _get_rel_path(*args)
+
+
+def _check_exists(*args):
+    partial_args = (args[:i] for i in range(len(args) + 1))
+    for a in partial_args:
+        path = _get_abs_path(*a)
+        if not path.exists():
+            raise ValueError(f'{path} does not exist')
+
+
+def _list_children(*args) -> Sequence[str]:
+    the_parent = _get_abs_path(*args)
+    if not the_parent.exists():
         return []
-    return sorted([path.name for path in table_dir.iterdir()])
-
-def _get_latest_version(table) -> str:
-    return list_versions(table)[-1]
-
-def _get_best_format(table, version, item):
-    preference_order = conf[f'{item}_formats']
-
-    for fmt in preference_order:
-        path = conf['data_dir'] / get_rel_item_path(table, version, item, fmt)
-        if path.exists():
-            return fmt
-
-def get_rel_item_path(table, version, item, fmt):
-    suffix = _PATH_SUFFIXES[item][fmt]
-    filename = f'{table}{suffix}'
-    return get_rel_table_version_dir(table, version) / item / filename
-
-def _read(table, version, item, fmt):
-    if version is None:
-        version = _get_latest_version(table)
-
-    if fmt is None:
-        fmt = _get_best_format(table, version, item)
-
-    read_module = importlib.import_module(f'eust.{item}')
-    read_func = getattr(read_module, f'read_{fmt}')
-    item_path = conf['data_dir'] / get_rel_item_path(table, version, item, fmt)
-    return read_func(item_path)
-
-def read_metadata(table, version=None, fmt=None):
-    return _read(table, version, 'metadata', fmt)
-
-def read_data(table, version=None, fmt=None):
-    return _read(table, version, 'data', fmt)
+    return sorted([c.name for c in the_parent.iterdir()])

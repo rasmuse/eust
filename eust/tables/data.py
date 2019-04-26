@@ -3,13 +3,16 @@
 import re
 import gzip
 
+import requests
 import pandas as pd
 
 
 _DIMENSION_NAME_RE = re.compile(r'^[a-z_]+$')
 
+
 def _is_valid_dimension_name(s: str) -> bool:
     return bool(_DIMENSION_NAME_RE.match(s))
+
 
 def _split_values_flags(series: pd.Series) -> pd.DataFrame:
     split = series.str.split(' ')
@@ -20,7 +23,7 @@ def _split_values_flags(series: pd.Series) -> pd.DataFrame:
     return df
 
 
-def read_tsv(path_or_buffer) -> pd.DataFrame:
+def _read_tsv(path_or_buffer) -> pd.DataFrame:
     d = pd.read_csv(path_or_buffer, sep='\t', header=0, dtype=str)
 
     top_left_cell = d.columns[0]
@@ -64,6 +67,28 @@ def read_tsv(path_or_buffer) -> pd.DataFrame:
     return d
 
 
-def read_tsv_gz(path_or_buffer) -> pd.DataFrame:
-    with gzip.open(path_or_buffer, 'rb') as f:
-        return read_tsv(f)
+_TSV_GZ_FILENAME = 'data.tsv.gz'
+
+
+def _get_tsv_gz_path(the_dir):
+    return the_dir / _TSV_GZ_FILENAME
+
+
+def read_tsv_gz(the_dir) -> pd.DataFrame:
+    path = _get_tsv_gz_path(the_dir)
+
+    with gzip.open(path, 'rb') as f:
+        return _read_tsv(f)
+
+
+def _download_file(url, path):
+    r = requests.get(url, stream=True)
+    r.raise_for_status()
+    with open(path, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            f.write(chunk)
+
+
+def download_tsv_gz(table, dst_dir, url):
+    path = _get_tsv_gz_path(dst_dir)
+    _download_file(url, path)
