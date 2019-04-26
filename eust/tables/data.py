@@ -8,6 +8,7 @@ import pandas as pd
 
 
 _DIMENSION_NAME_RE = re.compile(r'^[a-z_]+$')
+_YEAR_RE = re.compile(r'^(1|2)[0-9]{3}$')
 
 
 def _is_valid_dimension_name(s: str) -> bool:
@@ -23,6 +24,13 @@ def _split_values_flags(series: pd.Series) -> pd.DataFrame:
     return df
 
 
+def _set_multiindex_dtype(index, level, type_):
+    index_df = index.to_frame()
+    index_df[level] = index_df[level].astype(type_)
+    new_index = index_df.set_index(index.names).index
+    return new_index
+
+
 def _read_tsv(path_or_buffer) -> pd.DataFrame:
     d = pd.read_csv(path_or_buffer, sep='\t', header=0, dtype=str)
 
@@ -34,7 +42,6 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
     del d[top_left_cell]
     assert len(set(index_data)) == len(index_data) # no duplicates
 
-
     assert len(row_dimension_names) >= 1
 
     d.columns.name = header_dimension_name
@@ -43,7 +50,7 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
 
     d.index = pd.MultiIndex.from_arrays(
         list(zip(*index_data)),
-        names=row_dimension_names
+        names=row_dimension_names,
         )
 
     # cannot handle multidimensional column labels
@@ -63,6 +70,12 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
 
     d.loc[d['value'] == ':', 'value'] = pd.np.nan
     d['value'] = d['value'].astype(float)
+
+    if 'time' in d.index.names:
+        time_strings = d.index.unique('time')
+        matches_year = (_YEAR_RE.match(s) for s in time_strings)
+        if all(matches_year):
+            d.index = _set_multiindex_dtype(d.index, 'time', int)
 
     return d
 
