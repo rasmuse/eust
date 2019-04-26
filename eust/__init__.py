@@ -14,4 +14,7 @@ from eust.tables import (
     list_table_versions,
     )
 
-import eust.nuts
+from eust.nuts import (
+    read_nuts_codes,
+    read_country_names,
+    )

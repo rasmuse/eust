@@ -37,8 +37,10 @@ conf.load()
 
 
 _TABLES_DIR = 'tables'
+_NUTS_DIR = 'nuts'
 _BASE_DIRS = (
     _TABLES_DIR,
+    _NUTS_DIR
     )
 
 
