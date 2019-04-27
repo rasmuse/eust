@@ -65,6 +65,21 @@ def test_table_download_and_read(temp_repo):
 
     assert dims_in_data <= (dims_in_metadata | dims_without_metadata)
 
+
+def test_table_read_twice(temp_repo):
+    # Read data twice and check that the data is identical;
+    # this is relevant since we create the hdf5 format when
+    # reading the tsv.gz file the first time.
+
+    eust.download_table(_TEST_TABLE_DOWNLOAD)
+
+    data1 = eust.read_table_data(_TEST_TABLE_DOWNLOAD)
+    data2 = eust.read_table_data(_TEST_TABLE_DOWNLOAD)
+
+    assert data1.shape == data2.shape
+    assert (data1.stack() == data2.stack()).all()
+
+
 # def test_command_line_interface():
 #     """Test the CLI."""
 #     runner = CliRunner()
