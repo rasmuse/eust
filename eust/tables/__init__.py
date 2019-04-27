@@ -41,7 +41,7 @@ def list_table_versions(table) -> Sequence[str]:
 def _get_latest_version(table) -> str:
     versions = list_table_versions(table)
     if not versions:
-        raise ValueError(f'no versions available of table {table}')
+        raise FileNotFoundError(f'no versions available of table {table}')
     return versions[-1]
 
 
