@@ -6,33 +6,71 @@
 import pytest
 
 from click.testing import CliRunner
+import tempfile
+import shutil
 
-from eust import eust
+import eust
 from eust import cli
 
 
 @pytest.fixture
-def response():
-    """Sample pytest fixture.
+def temp_repo(request):
 
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
+    temp_dir = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(temp_dir)
+
+    def temp_dir_conf():
+        return {'data_dir': temp_dir}
+
+    eust.conf.loaders.insert(0, temp_dir_conf)
+    eust.conf.load()
+
+    request.addfinalizer(fin)
+
+    return temp_dir
 
 
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
+def test_nuts_download_and_read(temp_repo):
+    with pytest.raises(FileNotFoundError):
+        eust.read_nuts_codes(2006)
+
+    eust.download_nuts_codes()
+
+    nc = eust.read_nuts_codes
 
 
-def test_command_line_interface():
-    """Test the CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert 'eust.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
-    assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
+
+_TEST_TABLE_DOWNLOAD = 'educ_thpar'
+
+def test_table_download_and_read(temp_repo):
+    with pytest.raises(FileNotFoundError):
+        eust.read_table_data(_TEST_TABLE_DOWNLOAD)
+
+    with pytest.raises(FileNotFoundError):
+        eust.read_table_metadata(_TEST_TABLE_DOWNLOAD)
+
+    eust.download_table(_TEST_TABLE_DOWNLOAD)
+
+    metadata = eust.read_table_metadata(_TEST_TABLE_DOWNLOAD)
+    data = eust.read_table_data(_TEST_TABLE_DOWNLOAD)
+
+    dims_in_metadata = set(
+        metadata['dimensions'].index.unique('dimension'))
+
+    dims_without_metadata = {'time'}
+
+    dims_in_data = set(data.index.names)
+
+    assert dims_in_data <= (dims_in_metadata | dims_without_metadata)
+
+# def test_command_line_interface():
+#     """Test the CLI."""
+#     runner = CliRunner()
+#     result = runner.invoke(cli.main)
+#     assert result.exit_code == 0
+#     assert 'eust.cli.main' in result.output
+#     help_result = runner.invoke(cli.main, ['--help'])
+#     assert help_result.exit_code == 0
+#     assert '--help  Show this message and exit.' in help_result.output
