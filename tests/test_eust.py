@@ -36,9 +36,17 @@ def test_nuts_download_and_read(temp_repo):
     with pytest.raises(FileNotFoundError):
         eust.read_nuts_codes(2006)
 
+    with pytest.raises(FileNotFoundError):
+        eust.read_nuts_codes('2006')
+
     eust.download_nuts_codes()
 
-    nc = eust.read_nuts_codes
+    nc_2006 = eust.read_nuts_codes(2006)
+
+    nc_2006_2 = eust.read_nuts_codes('2006')
+
+    assert nc_2006.shape == nc_2006_2.shape
+    assert (nc_2006.stack() == nc_2006_2.stack()).all()
 
 
 
