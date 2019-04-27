@@ -28,6 +28,8 @@ def get_default_config():
         'sdmx_service_name': 'ESTAT',
         'sdmx_datastructure_template': 'DSD_{table}',
         'data_dir': '~/eurostat-data',
+        'hdf_complevel': 5,
+        'hdf_complib': 'zlib',
     }
 
 

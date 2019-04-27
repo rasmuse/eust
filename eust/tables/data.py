@@ -5,7 +5,7 @@ import gzip
 
 import pandas as pd
 
-from eust.core import _download_file
+from eust.core import _download_file, conf
 
 
 _DIMENSION_NAME_RE = re.compile(r'^[a-z_]+$')
@@ -103,5 +103,10 @@ def _read(the_dir):
         return pd.read_hdf(hdf_path, _HDF_TABLE_PATH)
     except FileNotFoundError:
         data = _read_tsv_gz(tsv_gz_path)
-        data.to_hdf(hdf_path, _HDF_TABLE_PATH)
+        data.to_hdf(
+            hdf_path,
+            _HDF_TABLE_PATH,
+            complevel=conf['hdf_complevel'],
+            complib=conf['hdf_complib'],
+            )
         return data
