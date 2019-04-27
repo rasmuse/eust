@@ -49,8 +49,8 @@ def test_nuts_download_and_read(temp_repo):
     assert (nc_2006.stack() == nc_2006_2.stack()).all()
 
 
-
 _TEST_TABLE_DOWNLOAD = 'educ_thpar'
+
 
 def test_table_download_and_read(temp_repo):
     with pytest.raises(FileNotFoundError):

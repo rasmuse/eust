@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import importlib
 from typing import (
     Union,
-    Optional,
     Sequence,
     )
 from pathlib import Path
@@ -14,6 +12,7 @@ import yaconf
 PathLike = Union[Path, str]
 
 APP_NAME = 'eust'
+
 
 def get_default_config():
     return {

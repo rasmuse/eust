@@ -4,7 +4,6 @@
 from typing import (
     Sequence,
     )
-import importlib
 import os
 import shutil
 from pathlib import Path
@@ -15,7 +14,6 @@ from eust.core import (
     _get_rel_path,
     _get_abs_path,
     _list_children,
-    conf,
     )
 from eust.tables.scrape import _scrape_bulk_info
 import eust.tables.metadata

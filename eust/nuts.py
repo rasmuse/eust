@@ -15,11 +15,11 @@ from eust.core import conf, _get_abs_path, _NUTS_DIR, _download_file
 
 
 _EXCEL_COLS = {
-    'COUNTRY': 'country_code', # In NUTS 2006 file
+    'COUNTRY': 'country_code',  # In NUTS 2006 file
     'CODE': 'geo',
     'LABEL': 'label',
     'NUTS_LEVEL': 'nuts_level',
-    'COUNTRY CODE': 'country_code', # In NUTS 2010, 2013, 2016 files
+    'COUNTRY CODE': 'country_code',  # In NUTS 2010, 2013, 2016 files
     'NUTS CODE': 'geo',
     'NUTS LEVEL': 'nuts_level',
     'NUTS LABEL': 'label'
@@ -35,11 +35,12 @@ COLS_TO_KEEP = [
 
 PARENT_COLNAME = 'parent_geo'
 
+
 def _read_and_transform_excel_file(excel_path):
     indata = pd.read_excel(excel_path)
     d = indata.reindex(list(_EXCEL_COLS), axis=1).dropna(axis=1, how='all')
     d = d.rename(columns=_EXCEL_COLS)
-    parents = d[d.nuts_level>0].geo.str[0:-1]
+    parents = d[d.nuts_level > 0].geo.str[0:-1]
     d[PARENT_COLNAME] = parents
     d = d[COLS_TO_KEEP]
     d.set_index('geo', inplace=True)
@@ -54,6 +55,7 @@ def _read_csv_file(csv_path):
 
 _EXCEL_TEMPLATES = ['NUTS_{year}.xlsx', 'NUTS_{year}.xls']
 _CSV_TEMPLATE = 'NUTS_{year}.csv'
+
 
 def _get_nuts_dir():
     return _get_abs_path(_NUTS_DIR)
@@ -88,9 +90,9 @@ def _try_read_options(year):
     return d
 
 
-
 _COUNTRY_NAMES_LANGUAGE = 'English'
 _COUNTRY_NAMES_FILENAME = 'country_names.csv'
+
 
 def read_country_names():
     path = _get_nuts_dir() / _COUNTRY_NAMES_FILENAME

@@ -41,7 +41,7 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
     row_dimension_names = row_dimension_names.split(',')
     index_data = d[top_left_cell]
     del d[top_left_cell]
-    assert len(set(index_data)) == len(index_data) # no duplicates
+    assert len(set(index_data)) == len(index_data)  # no duplicates
 
     assert len(row_dimension_names) >= 1
 

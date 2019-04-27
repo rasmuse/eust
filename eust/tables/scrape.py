@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from typing import (
-    Mapping,
-    Callable,
-    Any,
-    Optional,
-    )
 
 import requests
 import lxml.html
@@ -63,7 +57,7 @@ def _scrape_bulk_info(table):
     table_start_letter = table[0]
     table_infos = _scrape_bulk_infos(table_start_letter)
 
-    if not table in table_infos:
+    if table not in table_infos:
         raise ValueError(f'could not find bulk download info for {table}')
 
     table_info = table_infos[table]
