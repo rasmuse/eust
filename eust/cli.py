@@ -10,44 +10,19 @@ def main():
     pass
 
 @main.group()
-def nuts():
+def download():
     pass
 
-@nuts.command()
-@click.argument('excel_file', type=click.Path(exists=True))
-@click.argument('outfile', type=click.Path(exists=False))
-def to_csv(excel_file, outfile):
-    import eust.nuts
-    d = eust.nuts._read_and_transform_excel_file(excel_file)
-    d.to_csv(outfile)
+@download.command()
+@click.argument('tables', type=str, nargs=-1)
+def table(tables):
+    for table in tables:
+        eust.download_table(table)
 
 
-@main.group()
-def table():
-    pass
-
-@table.command()
-@click.argument('table_name', type=str)
-@click.argument('outfile', type=click.Path(exists=False))
-def download_datastructure(table_name, outfile):
-    import eust.metadata
-    eust.metadata.download_datastructure(table_name, outfile)
-
-
-@table.command()
-@click.argument('structure_file', type=click.Path(exists=True))
-@click.argument('tsv_file', type=click.Path(exists=True))
-@click.argument('hdf_file', type=click.Path(exists=False))
-def create(structure_file, tsv_file, hdf_file):
-    import pandas as pd
-    import eust.tables
-    import eust.metadata
-
-    with pd.HDFStore(hdf_file) as store:
-        store['data'] = eust.tables.raw_to_dataframe(tsv_file)
-        for key, labels in eust.metadata.read_labels(structure_file).items():
-            store[f'labels/{key}'] = labels
-
+@download.command()
+def nuts_codes():
+    eust.download_nuts_codes()
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
