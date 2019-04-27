@@ -104,3 +104,4 @@ def _read(the_dir):
     except FileNotFoundError:
         data = _read_tsv_gz(tsv_gz_path)
         data.to_hdf(hdf_path, _HDF_TABLE_PATH)
+        return data
