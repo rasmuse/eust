@@ -4,7 +4,7 @@
 
 __author__ = """Rasmus Einarsson"""
 __email__ = 'mr@rasmuseinarsson.se'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 from eust.core import conf  # noqa: F401
 
