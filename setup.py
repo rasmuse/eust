@@ -49,7 +49,7 @@ setup(
     include_package_data=True,
     keywords='eust',
     name='eust',
-    packages=find_packages(include=['eust']),
+    packages=find_packages(exclude=('tests')),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
