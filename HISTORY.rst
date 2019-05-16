@@ -2,6 +2,18 @@
 History
 =======
 
+0.3.0 (2019-05-16)
+------------------
+
+* Add CLI command list-tables.
+
+
+0.2.1 (2019-04-29)
+------------------
+
+* Fix bug where eust package was not correctly included in distribution.
+
+
 0.2.0 (2019-04-27)
 ------------------
 
