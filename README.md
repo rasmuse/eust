@@ -1,4 +1,4 @@
-# Eurostat tools
+# Eurostat tools for Python
 
 A set of tools to download, archive, and read Eurostat data.
 
@@ -41,7 +41,7 @@ or on the command line:
 eust download table apro_cpsh1
 ```
 
-## Check available tables
+## List available tables
 
 In Python:
 
