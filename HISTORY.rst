@@ -2,7 +2,7 @@
 History
 =======
 
-0.4.0 (date)
+0.4.0 (2019-05-17)
 ------------------
 
 * Always sort the index of the data.
