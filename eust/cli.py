@@ -62,5 +62,22 @@ def list_tables(versions, latest):
             click.echo(f'{table:<20} {version}')
 
 
+@main.group()
+def config():
+    pass
+
+
+@config.command()
+def list_paths():
+    for p in eust.list_config_paths():
+        click.echo(p)
+
+
+@config.command()
+@click.argument('key', type=str)
+def read(key):
+    click.echo(eust.conf[key])
+
+
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover

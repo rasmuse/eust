@@ -42,6 +42,14 @@ conf.modify = modify_config
 conf.load()
 
 
+def list_config_paths():
+    return [
+        loader.path
+        for loader in conf.loaders
+        if hasattr(loader, 'path')
+    ]
+
+
 _TABLES_DIR = 'tables'
 _NUTS_DIR = 'nuts'
 _BASE_DIRS = (

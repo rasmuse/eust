@@ -7,6 +7,7 @@ History
 
 * Always sort the index of the data.
 * Encode absence of flags as null in flag column.
+* Add some config reading functions to API and CLI.
 
 
 0.3.0 (2019-05-16)
