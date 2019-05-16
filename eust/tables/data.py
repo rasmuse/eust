@@ -102,13 +102,25 @@ def _read(the_dir):
     hdf_path = the_dir / _HDF_FILENAME
     tsv_gz_path = the_dir / _TSV_GZ_FILENAME
     try:
-        return pd.read_hdf(hdf_path, _HDF_TABLE_PATH)
+        data = pd.read_hdf(hdf_path, _HDF_TABLE_PATH)
     except FileNotFoundError:
         data = _read_tsv_gz(tsv_gz_path)
+
         data.to_hdf(
             hdf_path,
             _HDF_TABLE_PATH,
             complevel=conf['hdf_complevel'],
             complib=conf['hdf_complib'],
             )
-        return data
+
+    # Replace empty flags by None (issue #3)
+    #
+    # Doing it at this point so that the null flag is saved in the HDF
+    # file as a string, for performance reasons.
+    # This is a pandas PerformanceWarning:
+    # "your performance may suffer as PyTables will pickle object types
+    # that it cannot map directly to c-types
+    # [inferred_type->mixed,key->block0_values] [items->['flag']]"
+    data['flag'] = data['flag'].replace({'': None})
+
+    return data
