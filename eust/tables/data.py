@@ -78,6 +78,8 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
         if all(matches_year):
             d.index = _set_multiindex_dtype(d.index, 'time', int)
 
+    d = d.sort_index()
+
     return d
 
 
