@@ -6,7 +6,7 @@ A set of tools to download, archive, and read Eurostat data.
 
 # Features
 
-* Read Eurostat tables and metadata as [pandas] datastructures.
+* Read Eurostat tables and metadata as [pandas] data structures.
 * Download whole tables with one line of code instead of clicking through the [bulk download facility].
 * Download, archive, and use multiple table versions. This helps to make your calculations reproducible.
 * Python API and command line interface.
