@@ -53,7 +53,7 @@ assert 'apro_cpshr' in my_tables
 or on the command line:
 
 ```bash
-eust list-tables  # list all versions of all tables
+eust list-tables  # list all versions of all tables in your data directory
 eust list-tables --latest  # list only the latest version of each table
 eust list-tables --no-versions  # list only the table names
 ```
@@ -89,7 +89,7 @@ flagged_data = data[data['flag'].notnull()]
 
 ### Read a specific version
 
-Tables are saved with versions. Simply calling `read_table_data(table_name)` always loads the latest version. To improve reproducibility, pin your code to a specific version:
+Tables are saved with versions. Simply calling `read_table_data(table_name)` always loads the latest version you have available. To improve reproducibility, pin your code to a specific version:
 
 ```python
 versions = eust.list_table_versions('apro_cpshr')
@@ -97,6 +97,8 @@ latest_version = versions[-1]  # e.g. '2019-05-02 23:00:00'
 
 data = eust.read_table_data('apro_cpsh1', version='2019-05-02 23:00:00')
 ```
+
+**Note** that `list_table_versions(table)` lists the versions you have in your local data directory. This tool knows nothing about the (many) previous versions that Eurostat has published in the past.
 
 ## Read metadata
 
