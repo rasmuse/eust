@@ -9,7 +9,7 @@ import numpy as np
 from eust.core import _download_file, conf
 
 
-_DIMENSION_NAME_RE = re.compile(r'^[a-z_]+$')
+_DIMENSION_NAME_RE = re.compile(r'^[a-z_0-9]+$')
 _YEAR_RE = re.compile(r'^(1|2)[0-9]{3}$')
 
 
