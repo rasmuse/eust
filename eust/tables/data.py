@@ -4,6 +4,7 @@ import re
 import gzip
 
 import pandas as pd
+import numpy as np
 
 from eust.core import _download_file, conf
 
@@ -69,7 +70,7 @@ def _read_tsv(path_or_buffer) -> pd.DataFrame:
 
     d = _split_values_flags(d)
 
-    d.loc[d['value'] == ':', 'value'] = pd.np.nan
+    d.loc[d['value'] == ':', 'value'] = np.nan
     d['value'] = d['value'].astype(float)
 
     if 'time' in d.index.names:
