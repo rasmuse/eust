@@ -2,6 +2,13 @@
 History
 =======
 
+0.5.0 (2020-02-07)
+------------------
+
+* Make table directory names Windows-compatible by writing timestamps without colon. (Fixes issue #4.)
+* Test on Python 3.6, 3.7, 3.8.
+* Make compatible with pandas v1.0.0.
+
 0.4.0 (2019-05-17)
 ------------------
 
