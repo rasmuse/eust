@@ -10,7 +10,7 @@ from eust.core import (
     )
 
 _PAGE_DATE_FORMAT = r'%d/%m/%Y %H:%M:%S'
-_VERSION_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
+_VERSION_DATE_FORMAT = r'%Y-%m-%d %H%M%S'
 
 
 def _get_table_name(row):
