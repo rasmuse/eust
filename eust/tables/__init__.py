@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from typing import (
-    Sequence,
-    )
+from typing import Sequence
 import os
 import shutil
 from pathlib import Path
@@ -14,7 +12,7 @@ from eust.core import (
     _get_rel_path,
     _get_abs_path,
     _list_children,
-    )
+)
 from eust.tables.scrape import _scrape_bulk_info
 import eust.tables.metadata
 import eust.tables.data
@@ -39,7 +37,7 @@ def list_table_versions(table) -> Sequence[str]:
 def _get_latest_version(table) -> str:
     versions = list_table_versions(table)
     if not versions:
-        raise FileNotFoundError(f'no versions available of table {table}')
+        raise FileNotFoundError(f"no versions available of table {table}")
     return versions[-1]
 
 
@@ -63,7 +61,7 @@ def read_table_data(table, version=None):
 def download_table(table: str) -> None:
     table_info = _scrape_bulk_info(table)
 
-    version = table_info['version']
+    version = table_info["version"]
 
     version_dir = _get_table_abs_path(table, version)
     if version_dir.exists():
@@ -74,7 +72,7 @@ def download_table(table: str) -> None:
         os.makedirs(version_tempdir)
 
         eust.tables.metadata._download_sdmx(table, version_tempdir)
-        eust.tables.data._download_tsv_gz(table_info['url'], version_tempdir)
+        eust.tables.data._download_tsv_gz(table_info["url"], version_tempdir)
 
         os.makedirs(version_dir.parent, exist_ok=True)
         shutil.move(version_tempdir, version_dir)

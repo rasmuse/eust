@@ -3,8 +3,8 @@
 """Top-level package for Eurostat tools."""
 
 __author__ = """Rasmus Einarsson"""
-__email__ = 'mr@rasmuseinarsson.se'
-__version__ = '0.5.1'
+__email__ = "mr@rasmuseinarsson.se"
+__version__ = "0.5.1"
 
 from eust.core import conf, list_config_paths  # noqa: F401
 
@@ -14,10 +14,10 @@ from eust.tables import (  # noqa: F401
     read_table_metadata,
     list_tables,
     list_table_versions,
-    )
+)
 
 from eust.nuts import (  # noqa: F401
     read_nuts_codes,
     read_country_names,
     download_nuts_codes,
-    )
+)

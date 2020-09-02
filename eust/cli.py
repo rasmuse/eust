@@ -17,7 +17,7 @@ def download():
 
 
 @download.command()
-@click.argument('tables', type=str, nargs=-1)
+@click.argument("tables", type=str, nargs=-1)
 def table(tables):
     for table in tables:
         eust.download_table(table)
@@ -37,29 +37,29 @@ def _iter_table_versions_pairs(latest):
         for version in versions:
             yield (table, version)
 
+
 @main.command()
 @click.option(
-    '--versions/--no-versions',
+    "--versions/--no-versions",
     is_flag=True,
     default=True,
-    help='Print version information. (--no-versions implies --latest)',
+    help="Print version information. (--no-versions implies --latest)",
 )
 @click.option(
-    '--latest',
+    "--latest",
     is_flag=True,
     default=False,
-    help='Print the latest available version only.',
+    help="Print the latest available version only.",
 )
 def list_tables(versions, latest):
     if not versions:
         latest = True
 
-
     for table, version in _iter_table_versions_pairs(latest):
         if not versions:
             click.echo(table)
         else:
-            click.echo(f'{table:<20} {version}')
+            click.echo(f"{table:<20} {version}")
 
 
 @main.group()
@@ -74,7 +74,7 @@ def list_paths():
 
 
 @config.command()
-@click.argument('key', type=str)
+@click.argument("key", type=str)
 def read(key):
     click.echo(eust.conf[key])
 
