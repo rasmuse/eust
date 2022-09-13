@@ -48,7 +48,7 @@ def _get_dimensions_1(structure_message):
     codelist = pandasdmx.to_pandas(structure_message.codelist)
 
     dimension_items = {
-        name.lower(): codelist[f"CL_{name}"]
+        name.lower(): _get_column_if_dataframe(codelist[f"CL_{name}"], "name")
         for name in dimension_names
         if name not in _EXCLUDED_DIMENSIONS
     }
@@ -71,6 +71,16 @@ def _get_dimensions(codelist):
         return _get_dimensions_1(codelist)
 
     raise Exception(f"pandasdmx version is {pandasdmx.__version__}")
+
+
+def _get_column_if_dataframe(dataframe_or_series, colname):
+    # Workaround for codelist items, which used to be a pandas Series in a previous
+    # version of pandasdmx but are now pandas DataFrames.
+    if isinstance(dataframe_or_series, pd.DataFrame):
+        return dataframe_or_series[colname]
+    else:
+        assert isinstance(dataframe_or_series, pd.Series)
+        return dataframe_or_series
 
 
 def _get_attributes_0_9(structure_message):
@@ -101,7 +111,7 @@ def _get_attributes_1(structure_message):
     codelist = pandasdmx.to_pandas(structure_message.codelist)
 
     attribute_items = {
-        name.lower(): codelist[f"CL_{name}"] for name in attribute_names
+        name.lower(): _get_column_if_dataframe(codelist[f"CL_{name}"], "name") for name in attribute_names
     }
 
     attributes = (
